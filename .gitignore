@@ -18,6 +18,8 @@ frontend/tsconfig.tsbuildinfo
 *.egg-info/
 build/
 .deploy-tools/
+.agents/
+skills-lock.json
 
 .vercel
 .env*

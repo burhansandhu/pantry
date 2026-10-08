@@ -6,7 +6,7 @@ import os
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
@@ -165,7 +165,8 @@ def create_app(database_url=None):
         )
 
     @app.get("/api/sessions/{session_id}")
-    async def snapshot(session_id: str):
+    async def snapshot(session_id: str, response: Response):
+        response.headers["Cache-Control"] = "no-store"
         session = await app.state.store.get(session_id)
         snapshot = await session.graph.aget_state(config(session_id))
         return {
