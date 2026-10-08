@@ -1,0 +1,8 @@
+{
+  "name": "pantry-recipe-agent",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {"dev": "next dev --hostname 127.0.0.1", "build": "next build", "start": "next start --hostname 127.0.0.1", "typecheck": "tsc --noEmit", "test": "node --experimental-strip-types --test tests/stream.test.ts tests/ingredients.test.ts"},
+  "dependencies": {"next": "16.4.0", "react": "19.3.0", "react-dom": "19.3.0", "lucide-react": "^0.577.0", "react-markdown": "^10.1.0", "remark-gfm": "^4.0.1"},
+  "devDependencies": {"typescript": "^5.9.3", "@types/node": "^22.0.0", "@types/react": "^19.0.0", "@types/react-dom": "^19.0.0"}
+}
