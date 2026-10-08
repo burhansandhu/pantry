@@ -16,6 +16,7 @@ jobs:
   backend:
     name: Python tests and lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:16
@@ -40,11 +41,12 @@ jobs:
           python-version: "3.13"
       - run: uv sync --locked
       - run: uv run ruff check recipe_agent backend tests
-      - run: uv run pytest -q
+      - run: uv run pytest -q --timeout=60
 
   frontend:
     name: Frontend tests and production build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: frontend
