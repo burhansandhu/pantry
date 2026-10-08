@@ -1,6 +1,6 @@
 r"""Manual integration check against the running API; uses real Groq calls.
 
-Run from the root: .\.venv\Scripts\python.exe scripts/smoke_live.py
+Run from the root: .\.venv\Scripts\python.exe scripts/smoke_live.py [API_BASE_URL]
 All inputs and allergy confirmations below are synthetic test data.
 """
 
@@ -11,7 +11,7 @@ import time
 import httpx
 
 sys.stdout.reconfigure(encoding="utf-8")
-BASE = "http://127.0.0.1:8000"
+BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000").rstrip("/")
 
 
 def send(client, path, payload):
@@ -71,6 +71,9 @@ with httpx.Client(timeout=180) as client:
                     "; recipe characters:",
                     len(data[-1]["recipe"]),
                 )
+                restored = client.get(f"{BASE}/api/sessions/{sid}")
+                restored.raise_for_status()
+                assert restored.json()["recipe"] == data[-1]["recipe"]
                 break
             print("Review:", pending["kind"], pending["message"])
             assert not client.get(f"{BASE}/api/sessions/{sid}").json()["recipe"]

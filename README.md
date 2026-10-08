@@ -3,6 +3,8 @@
 A Next.js website and Python FastAPI backend built around LangGraph and Groq.
 The original CLI is also available and shares the web workflow.
 
+Live site: [Pantry](https://pantry-olive-nine.vercel.app).
+
 ## Start locally (Windows PowerShell)
 
 Requires Python 3.13+ and Node.js 22.18+ (for the frontend test runner).
@@ -158,6 +160,10 @@ For the CLI: `.\.venv\Scripts\python.exe -m recipe_agent.main` from the root.
 For a manual live integration check with synthetic ingredients (requires the
 backend to be running and makes real Groq calls):
 `.\.venv\Scripts\python.exe scripts/smoke_live.py`.
+Pass an API base URL to check a deployment, for example:
+`.\.venv\Scripts\python.exe scripts/smoke_live.py https://pantry-olive-nine.vercel.app`.
+This generates synthetic recipes and verifies streaming, approval gates,
+substitution allergy confirmation, and restoring completed sessions.
 
 Provider references: [Groq structured outputs](https://console.groq.com/docs/structured-outputs)
 and [LangGraph streaming](https://docs.langchain.com/oss/python/langgraph/streaming).
