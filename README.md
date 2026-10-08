@@ -51,7 +51,8 @@ Both services deploy together under one domain. Do not select `frontend` as
 the project root: that would omit the Python backend.
 
 In the Vercel project's **Storage** tab, connect a dedicated PostgreSQL database
-through the Neon integration. Its `DATABASE_URL` is used by FastAPI. Use a
+through the Neon integration. Its `DATABASE_URL` is used by FastAPI, and
+`DATABASE_URL_UNPOOLED` is used for schema initialization. Use a
 separate database or database branch for preview deployments when available.
 Pantry creates its session and LangGraph checkpoint tables automatically.
 
@@ -61,6 +62,7 @@ Set these server-side environment variables in Production and Preview:
 | --- | --- |
 | `GROQ_API_KEY` | Your Groq API key |
 | `DATABASE_URL` | PostgreSQL connection string from the integration |
+| `DATABASE_URL_UNPOOLED` | Direct connection string (required with a transaction pooler) |
 | `GROQ_MODEL` | `openai/gpt-oss-120b` (optional; this is the default) |
 | `RECIPE_STARTS_PER_HOUR` | `30` (optional; per client IP) |
 

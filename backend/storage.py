@@ -6,6 +6,9 @@ from uuid import uuid4
 
 from fastapi import HTTPException
 from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from psycopg import AsyncConnection
+from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from recipe_agent.graph import build_graph
@@ -68,13 +71,23 @@ class PostgresStore:
         self.graph = build_graph(checkpointer)
         self.hourly_limit = hourly_limit
 
-    async def setup(self):
-        # Serialize schema initialization across cold starts. Checkpoint setup
-        # uses another autocommit connection because it creates concurrent indexes.
-        async with self.pool.connection() as conn, conn.transaction():
-            await conn.execute("SELECT pg_advisory_xact_lock(731042181)")
-            await self.checkpointer.setup()
-            await conn.execute("""
+    async def setup(self, migration_url):
+        # Indexes created CONCURRENTLY wait for older transactions. Use a
+        # session lock on a dedicated autocommit connection, without opening a
+        # transaction while the official saver creates those indexes.
+        # A transaction-pooling provider must supply its direct connection URL.
+        async with await AsyncConnection.connect(
+            migration_url, autocommit=True, prepare_threshold=0, row_factory=dict_row
+        ) as conn:
+            await conn.execute("SELECT pg_advisory_lock(731042181)")
+            try:
+                await self._setup_tables(conn)
+            finally:
+                await conn.execute("SELECT pg_advisory_unlock(731042181)")
+
+    async def _setup_tables(self, conn):
+        await AsyncPostgresSaver(conn).setup()
+        await conn.execute("""
                 CREATE TABLE IF NOT EXISTS pantry_sessions (
                     id TEXT PRIMARY KEY,
                     pending JSONB,
@@ -84,7 +97,7 @@ class PostgresStore:
                     lease TEXT
                 )
             """)
-            await conn.execute("""
+        await conn.execute("""
                 CREATE TABLE IF NOT EXISTS pantry_rate_limits (
                     client_key TEXT PRIMARY KEY,
                     starts INTEGER NOT NULL,

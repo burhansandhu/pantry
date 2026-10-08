@@ -53,7 +53,7 @@ def create_app(database_url=None):
                 AsyncPostgresSaver(pool),
                 hourly_limit=int(os.getenv("RECIPE_STARTS_PER_HOUR", "30")),
             )
-            await store.setup()
+            await store.setup(os.getenv("DATABASE_URL_UNPOOLED") or database_url)
             app.state.store = store
             yield
 
